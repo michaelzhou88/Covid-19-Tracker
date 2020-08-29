@@ -19,6 +19,10 @@ body {
   justify-content: space-between;
 }
 
+.app__left {
+  flex: 0.9;  /* Takes up 90% of the screen*/
+}
+
 .app__stats {
   display: flex;
   justify-content: space-between;
