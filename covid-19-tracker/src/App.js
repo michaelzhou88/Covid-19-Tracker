@@ -9,12 +9,15 @@ import {
 import './App.css';
 import InfoBox from './InfoBox';
 import Map from './Map';
+import Table from "./Table";
+import { sortData } from './util';
 
 function App() {
   
   const [countries, setCountries] = useState([]); // Grabbing list of countries from API
   const [country, setCountry] = useState('worldwide');  // User selected country
   const [countryInfo, setCountryInfo] = useState([]); // Data of each individual country
+  const [tableData, setTableData] = useState([]);
   const baseURL = "https://disease.sh/v3/covid-19/countries";
   const worldwideURL = "https://disease.sh/v3/covid-19/all/";
 
@@ -37,6 +40,8 @@ function App() {
             value: country.countryInfo.iso2, // UK, US, FR etc
           }));
 
+          const sortedData = sortData(data);
+          setTableData(sortedData);
           setCountries(countries);
       });
     };
@@ -56,7 +61,6 @@ function App() {
       setCountryInfo(data);
     });
   };
-  console.log(countryInfo);
 
   return (
     <div className="app">
@@ -92,7 +96,7 @@ function App() {
         <CardContent>
           <h3>Live cases by country</h3>
           {/* Table */}
-          
+          <Table countries={tableData}/>
           <h3>Worldwide new cases</h3>
           {/* Graph  */}
         </CardContent>
