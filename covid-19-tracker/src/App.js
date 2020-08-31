@@ -1,48 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import "./App.css";
 import {
   MenuItem,
   FormControl,
   Select,
   Card,
-  CardContent
-} from '@material-ui/core';
-import InfoBox from './InfoBox';
-import Map from './Map';
+  CardContent,
+} from "@material-ui/core";
+import InfoBox from "./InfoBox";
+import LineGraph from "./LineGraph";
 import Table from "./Table";
-import { sortData, prettyPrintStat } from './util';
-import LineGraph from './LineGraph';
-import "leaflet/dist/leaflet.css";
+import { sortData, prettyPrintStat } from "./util";
 import numeral from "numeral";
+import Map from "./Map";
+import "leaflet/dist/leaflet.css";
 
-
-function App() {
-  
-  const [countries, setCountries] = useState([]); // Grabbing list of countries from API
-  const [country, setCountry] = useState('worldwide');  // User selected country
-  const [countryInfo, setCountryInfo] = useState([]); // Data of each individual country
+const App = () => {
+  const [countries, setCountries] = useState([]); 
+  const [country, setInputCountry] = useState("worldwide");  
+  const [countryInfo, setCountryInfo] = useState({}); 
   const [tableData, setTableData] = useState([]);
   const [casesType, setCasesType] = useState("cases");
-  // Load map
-  const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng:-40.4796});
+  const [mapCenter, setMapCenter] = useState({ lat: 34.80746, lng: -40.4796 });
   const [mapZoom, setMapZoom] = useState(3);
   const [mapCountries, setMapCountries] = useState([]);
 
-  const baseURL = "https://disease.sh/v3/covid-19/countries";
-  const worldwideURL = "https://disease.sh/v3/covid-19/all/";
-
   useEffect(() => {
-    fetch (worldwideURL)
-    .then(response => response.json())
+    fetch ("https://disease.sh/v3/covid-19/all/")
+    .then((response) => response.json())
     .then((data) => {
       setCountryInfo(data);
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     
     const getCountriesData = async () => {
-      await fetch (baseURL)
+      fetch ("https://disease.sh/v3/covid-19/countries")
       .then((response) => response.json())
       .then((data) => {
         const countries = data.map((country) => ({
@@ -63,16 +57,15 @@ function App() {
 
   const onCountryChange = async (event) => {
     const countryCode = event.target.value;
+    setInputCountry(countryCode);
 
-    const url = countryCode === 'worldwide' ? worldwideURL : baseURL + `${countryCode}` 
-
+    const url = countryCode === 'worldwide' ? "https://disease.sh/v3/covid-19/all/" : `https://disease.sh/v3/covid-19/countries/${countryCode}`; 
     await fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      setCountry(countryCode);
+    .then((response) => response.json())
+    .then((data) => {
+      setInputCountry(countryCode);
       setCountryInfo(data);
-
-      setMapCenter([data.countryInfo.lat, data.countryInfo.lng]);
+      setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
       setMapZoom(4);
     });
   };
@@ -97,11 +90,30 @@ function App() {
             </FormControl>
         </div>
         
-        <div className="app__stats">
-          {/* Infoboxes */}
-          <InfoBox isRed active={casesType === "cases"} onClick={(e) => setCasesType("cases")} title="Coronavirus cases" cases={prettyPrintStat(countryInfo.todayCases)} total={numeral(countryInfo.cases).format("0.0a")}/>
-          <InfoBox active={casesType === "recovered"} onClick={(e) => setCasesType("recovered")} title="Recoveries" cases={prettyPrintStat(countryInfo.todayRecovered)} total={numeral(countryInfo.recovered).format("0.0a")}/>
-          <InfoBox isRed active={casesType === "deaths"} onClick={(e) => setCasesType("deaths")} title="Deaths" cases={prettyPrintStat(countryInfo.todayDeaths)} total={numeral(countryInfo.deaths).format("0.0a")}/>
+         <div className="app__stats">
+          <InfoBox
+            onClick={(event) => setCasesType("cases")}
+            title="Coronavirus Cases"
+            isRed
+            active={casesType === "cases"}
+            cases={prettyPrintStat(countryInfo.todayCases)}
+            total={numeral(countryInfo.cases).format("0.0a")}
+          />
+          <InfoBox
+            onClick={(event) => setCasesType("recovered")}
+            title="Recovered"
+            active={casesType === "recovered"}
+            cases={prettyPrintStat(countryInfo.todayRecovered)}
+            total={numeral(countryInfo.recovered).format("0.0a")}
+          />
+          <InfoBox
+            onClick={(event) => setCasesType("deaths")}
+            title="Deaths"
+            isRed
+            active={casesType === "deaths"}
+            cases={prettyPrintStat(countryInfo.todayDeaths)}
+            total={numeral(countryInfo.deaths).format("0.0a")}
+          />
         </div>
 
         {/* Map  */}
@@ -114,17 +126,19 @@ function App() {
       </div>
       <Card className="app__right">
         <CardContent>
-          <h3>Live cases by country</h3>
-          {/* Table */}
-          <Table countries={tableData}/>
-          {/* Graph  */}
-          <h3 className="app__graphTitle">Worldwide new {casesType}</h3>
-          <LineGraph className="app__graph" casesType={casesType} />
+        <div className="app__information">
+            <h3>Live cases by country</h3>
+            {/* Table */}
+            <Table countries={tableData}/>
+            {/* Graph  */}
+            <h3 className="app__graphTitle">Worldwide new {casesType}</h3>
+            <LineGraph className="app__graph" casesType={casesType} />
+          </div>
         </CardContent>
       </Card>
     </div>
       
   );
-}
+};
 
 export default App;

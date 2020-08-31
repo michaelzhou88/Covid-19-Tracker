@@ -1,5 +1,5 @@
-import React from 'react'
-import './Table.css';
+import React from "react";
+import "./Table.css";
 import numeral from "numeral";
 
 function Table({ countries }) {
@@ -12,7 +12,7 @@ function Table({ countries }) {
                 </tr>
             ))}
         </div>
-    )
+    );
 }
 
 export default Table;
